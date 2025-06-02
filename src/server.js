@@ -1,0 +1,50 @@
+// server.js
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
+
+// Import routes
+const cateCarRoutes = require('./routes/catecarRoutes');
+const productRoutes = require('./routes/productRoutes');
+const unitRoutes = require('./routes/unitRoutes');
+const repairContentRoutes = require('./routes/repairContentRoutes');
+const carRoutes = require('./routes/carRoutes');
+const statusRoutes = require('./routes/statusRoutes');
+const solutionRoutes = require('./routes/solutionRoutes');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// CORS configuration
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5500'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// Use routes
+app.use('/api/catecar', cateCarRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/units', unitRoutes);
+app.use('/api/repair-contents', repairContentRoutes);
+app.use('/api/cars', carRoutes);
+app.use('/api/statuses', statusRoutes);
+app.use('/api/solutions', solutionRoutes);
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/excel', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  console.log('✅ Kết nối MongoDB thành công');
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  });
+})
+.catch(err => {
+  console.error('❌ Kết nối MongoDB thất bại', err);
+});
