@@ -509,10 +509,82 @@ exports.deleteCar = async (req, res) => {
 };
 
 // 🔧 Hàm xử lý dữ liệu sau populate
+// function populateWithCalculations(car) {
+//   let totalAmount = 0;
+
+//   const repairContents = car.repairContents.map(content => {
+//     const products = content.products.map(item => {
+//       if (!item.product) return item;
+
+//       const p = item.product;
+//       const price = p.price || 0;
+//       const tax = p.tax || 0;
+//       const quantity = item.quantity || 0;
+
+//       const priceAfterTax = price * (1 + tax / 100);
+//       const totalPrice = priceAfterTax * quantity;
+//       totalAmount += totalPrice;
+
+//       return {
+//         _id: item._id,
+//         quantity,
+//         product: {
+//           _id: p._id,
+//           code: p.code,
+//           brand: p.brand,
+//           origin: p.origin,
+//           specs: Array.isArray(p.specs) ? p.specs : [],
+//           originFull: p.brand && p.origin ? `${p.brand}/${p.origin}` : p.brand || p.origin || null,
+//           price,
+//           tax,
+//           priceAfterTax,
+//           unit: p.unit?.name || null,
+//         },
+//         totalPrice,
+//         statuses: item.statuses || [],
+//         solutions: item.solutions || []
+//       };
+//     });
+
+//     return {
+//       _id: content._id,
+//       name: content.repairContent?.name || null,
+//       repairContent: content.repairContent?._id || null,
+//       products
+//     };
+//   });
+
+//   return {
+//     _id: car._id,
+//     plateNumber: car.plateNumber,
+//     carType: car.carType,
+//     repairContents,
+//     totalAmount,
+//     createdAt: car.createdAt,
+//     updatedAt: car.updatedAt,
+//   };
+// }
 function populateWithCalculations(car) {
   let totalAmount = 0;
 
   const repairContents = car.repairContents.map(content => {
+    const name = content.repairContent?.name || null;
+
+    // Trường hợp là "Công"
+    if (name === "Công") {
+      const servicePrice = content.servicePrice || 0;
+      totalAmount += servicePrice;
+
+      return {
+        _id: content._id,
+        name,
+        repairContent: content.repairContent?._id || null,
+        servicePrice,
+        products: []
+      };
+    }
+
+    // Trường hợp bình thường (có sản phẩm)
     const products = content.products.map(item => {
       if (!item.product) return item;
 
@@ -548,7 +620,7 @@ function populateWithCalculations(car) {
 
     return {
       _id: content._id,
-      name: content.repairContent?.name || null,
+      name,
       repairContent: content.repairContent?._id || null,
       products
     };
@@ -564,4 +636,3 @@ function populateWithCalculations(car) {
     updatedAt: car.updatedAt,
   };
 }
-
