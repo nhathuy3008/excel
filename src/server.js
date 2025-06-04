@@ -35,16 +35,29 @@ app.use('/api/cars', carRoutes);
 app.use('/api/statuses', statusRoutes);
 app.use('/api/solutions', solutionRoutes);
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/excel', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ Kết nối MongoDB thành công');
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  });
-})
-.catch(err => {
-  console.error('❌ Kết nối MongoDB thất bại', err);
+// mongoose.connect('mongodb://localhost:27017/excel', {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// })
+// .then(() => {
+//   console.log('✅ Kết nối MongoDB thành công');
+//   app.listen(PORT, () => {
+//     console.log(`🚀 Server is running on http://localhost:${PORT}`);
+//   });
+// })
+// .catch(err => {
+//   console.error('❌ Kết nối MongoDB thất bại', err);
+// });
+    mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('✅ Connected to MongoDB');
+
+    // 👇 FIX: Dùng server.listen thay vì app.listen
+    server.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+    });
+}).catch(err => {
+    console.error('❌ MongoDB connection error:', err);
 });

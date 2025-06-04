@@ -573,13 +573,17 @@ function populateWithCalculations(car) {
     // Trường hợp là "Công"
     if (name === "Công") {
       const servicePrice = content.servicePrice || 0;
-      totalAmount += servicePrice;
+      const tax = 8; // Thuế mặc định cho công
+      const servicePriceAfterTax = servicePrice * (1 + tax / 100);
+      totalAmount += servicePriceAfterTax;
 
       return {
         _id: content._id,
         name,
         repairContent: content.repairContent?._id || null,
         servicePrice,
+        servicePriceAfterTax,
+        tax,
         products: []
       };
     }
@@ -636,3 +640,4 @@ function populateWithCalculations(car) {
     updatedAt: car.updatedAt,
   };
 }
+
