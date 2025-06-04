@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5500'],
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://excelll.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type'],
   credentials: true,
@@ -55,7 +55,7 @@ app.use('/api/solutions', solutionRoutes);
     console.log('✅ Connected to MongoDB');
 
     // 👇 FIX: Dùng server.listen thay vì app.listen
-    server.listen(PORT, () => {
+    app.listen(PORT, () => {
         console.log(`🚀 Server is running on port ${PORT}`);
     });
 }).catch(err => {
