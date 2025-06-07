@@ -3,18 +3,32 @@ const Status = require('../models/Status');
 exports.createStatus = async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name) return res.status(400).json({ message: 'Tên hiện trạng là bắt buộc.' });
 
-    const existing = await Status.findOne({ name });
-    if (existing) return res.status(409).json({ message: 'Hiện trạng đã tồn tại.' });
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ message: 'Tên hiện trạng là bắt buộc.' });
+    }
 
-    const status = new Status({ name });
+    const trimmedName = name.trim();
+
+    // Kiểm tra hiện trạng đã tồn tại (không phân biệt hoa thường)
+    const existing = await Status.findOne({ name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } });
+
+    if (existing) {
+      // Cập nhật lại tên nếu cần
+      existing.name = trimmedName;
+      const updated = await existing.save();
+      return res.status(200).json({ message: 'Cập nhật hiện trạng thành công.', status: updated });
+    }
+
+    // Nếu chưa tồn tại thì tạo mới
+    const status = new Status({ name: trimmedName });
     const saved = await status.save();
-    res.status(201).json(saved);
+    res.status(201).json({ message: 'Tạo hiện trạng thành công.', status: saved });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi tạo hiện trạng', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo/cập nhật hiện trạng', error: error.message });
   }
 };
+
 
 exports.getAllStatuses = async (req, res) => {
   try {

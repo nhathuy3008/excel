@@ -3,18 +3,31 @@ const Solution = require('../models/Solution');
 exports.createSolution = async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name) return res.status(400).json({ message: 'Tên biện pháp là bắt buộc.' });
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ message: 'Tên biện pháp là bắt buộc.' });
+    }
 
-    const existing = await Solution.findOne({ name });
-    if (existing) return res.status(409).json({ message: 'Biện pháp đã tồn tại.' });
+    const trimmedName = name.trim();
 
-    const solution = new Solution({ name });
+    // Tìm biện pháp đã tồn tại (không phân biệt hoa thường)
+    const existing = await Solution.findOne({ name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } });
+
+    if (existing) {
+      // Cập nhật lại tên nếu cần (ví dụ khác cách viết)
+      existing.name = trimmedName;
+      const updated = await existing.save();
+      return res.status(200).json({ message: 'Cập nhật biện pháp thành công.', solution: updated });
+    }
+
+    // Nếu chưa tồn tại thì tạo mới
+    const solution = new Solution({ name: trimmedName });
     const saved = await solution.save();
-    res.status(201).json(saved);
+    res.status(201).json({ message: 'Tạo biện pháp thành công.', solution: saved });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi tạo biện pháp', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo/cập nhật biện pháp', error: error.message });
   }
 };
+
 
 exports.getAllSolutions = async (req, res) => {
   try {

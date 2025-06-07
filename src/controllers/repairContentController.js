@@ -5,18 +5,32 @@ exports.createRepairContent = async (req, res) => {
   try {
     const { name } = req.body;
 
-    if (!name) {
+    if (!name || name.trim() === '') {
       return res.status(400).json({ message: 'Tên nội dung sửa chữa là bắt buộc.' });
     }
 
-    const newContent = new RepairContent({ name });
+    const trimmedName = name.trim();
+
+    // Kiểm tra nội dung sửa chữa đã tồn tại chưa (không phân biệt hoa thường)
+    const existing = await RepairContent.findOne({ name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } });
+
+    if (existing) {
+      // Cập nhật tên (chỉ để đồng bộ nếu viết khác)
+      existing.name = trimmedName;
+      const updated = await existing.save();
+      return res.status(200).json({ message: 'Cập nhật nội dung sửa chữa thành công.', content: updated });
+    }
+
+    // Nếu chưa tồn tại thì tạo mới
+    const newContent = new RepairContent({ name: trimmedName });
     const saved = await newContent.save();
 
-    res.status(201).json(saved);
+    res.status(201).json({ message: 'Tạo nội dung sửa chữa thành công.', content: saved });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi tạo nội dung sửa chữa', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo/cập nhật nội dung sửa chữa', error: error.message });
   }
 };
+
 
 // Lấy danh sách nội dung sửa chữa
 exports.getAllRepairContents = async (req, res) => {

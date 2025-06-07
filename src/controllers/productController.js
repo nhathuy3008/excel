@@ -9,15 +9,30 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ message: 'Vui lòng nhập đầy đủ mã hàng, đơn vị tính và giá.' });
     }
 
+    // Nếu specs là chuỗi thì tách thành mảng
+    const specsArray = typeof specs === 'string'
+      ? specs.split(',').map(s => s.trim())
+      : Array.isArray(specs)
+        ? specs
+        : [];
+
     // Kiểm tra mã hàng đã tồn tại chưa
     const existing = await Product.findOne({ code });
+    
     if (existing) {
-      return res.status(409).json({ message: 'Mã hàng đã tồn tại.' });
+      // Cập nhật sản phẩm nếu đã tồn tại
+      existing.brand = brand;
+      existing.origin = origin;
+      existing.specs = specsArray;
+      existing.unit = unit;
+      existing.price = price;
+      existing.tax = tax;
+
+      const updated = await existing.save();
+      return res.status(200).json({ message: 'Cập nhật sản phẩm thành công.', product: updated });
     }
 
-    // Nếu specs là chuỗi thì tách thành mảng
-    const specsArray = typeof specs === 'string' ? specs.split(',').map(s => s.trim()) : Array.isArray(specs) ? specs : [];
-
+    // Nếu chưa tồn tại thì tạo mới
     const newProduct = new Product({
       code,
       brand,
@@ -29,11 +44,12 @@ exports.createProduct = async (req, res) => {
     });
 
     const saved = await newProduct.save();
-    res.status(201).json(saved);
+    res.status(201).json({ message: 'Tạo sản phẩm mới thành công.', product: saved });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi tạo sản phẩm', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo/cập nhật sản phẩm', error: error.message });
   }
 };
+
 
 // Lấy danh sách tất cả sản phẩm
 exports.getAllProducts = async (req, res) => {

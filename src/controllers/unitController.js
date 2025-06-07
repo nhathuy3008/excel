@@ -3,16 +3,33 @@ const Unit = require('../models/Unit');
 exports.createUnit = async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name) return res.status(400).json({ message: 'Tên đơn vị là bắt buộc' });
 
-    const newUnit = new Unit({ name });
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ message: 'Tên đơn vị là bắt buộc.' });
+    }
+
+    const trimmedName = name.trim();
+
+    // Kiểm tra tên đơn vị đã tồn tại (không phân biệt hoa thường)
+    const existing = await Unit.findOne({ name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } });
+
+    if (existing) {
+      // Cập nhật lại tên nếu cần
+      existing.name = trimmedName;
+      const updated = await existing.save();
+      return res.status(200).json({ message: 'Cập nhật đơn vị thành công.', unit: updated });
+    }
+
+    // Nếu chưa tồn tại thì tạo mới
+    const newUnit = new Unit({ name: trimmedName });
     const savedUnit = await newUnit.save();
 
-    res.status(201).json(savedUnit);
+    res.status(201).json({ message: 'Tạo đơn vị thành công.', unit: savedUnit });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi thêm đơn vị', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo/cập nhật đơn vị', error: error.message });
   }
 };
+
 
 exports.getAllUnits = async (req, res) => {
   try {
