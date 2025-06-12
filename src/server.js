@@ -12,6 +12,7 @@ const repairContentRoutes = require('./routes/repairContentRoutes');
 const carRoutes = require('./routes/carRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const solutionRoutes = require('./routes/solutionRoutes');
+const accountRoutes = require('./routes/accountRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:5173', 'https://excell-woad.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // 👈 cho phép gửi token
   credentials: true,
 };
 
@@ -34,6 +35,7 @@ app.use('/api/repair-contents', repairContentRoutes);
 app.use('/api/cars', carRoutes);
 app.use('/api/statuses', statusRoutes);
 app.use('/api/solutions', solutionRoutes);
+app.use('/api/accounts', accountRoutes);
 // MongoDB connection
 // mongoose.connect('mongodb://localhost:27017/excel', {
 //   useNewUrlParser: true,

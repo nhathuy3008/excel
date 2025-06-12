@@ -19,6 +19,10 @@ const mongoose = require('mongoose');
 //         ref: 'RepairContent',
 //         required: true
 //       },
+//       servicePrice: {
+//         type: Number,
+//         default: 0 // Dùng cho "Công"
+//       },
 //       products: [
 //         {
 //           product: {
@@ -48,8 +52,7 @@ const mongoose = require('mongoose');
 //     }
 //   ]
 // }, { timestamps: true });
-
-// module.exports = mongoose.model('Car', carSchema); 
+// module.exports = mongoose.model('Car', carSchema);
 const carSchema = new mongoose.Schema({
   plateNumber: {
     type: String,
@@ -71,7 +74,7 @@ const carSchema = new mongoose.Schema({
       },
       servicePrice: {
         type: Number,
-        default: 0 // Dùng cho "Công"
+        default: 0
       },
       products: [
         {
@@ -85,21 +88,22 @@ const carSchema = new mongoose.Schema({
             required: true,
             min: 1
           },
-          statuses: [
-            {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Status'
-            }
-          ],
-          solutions: [
-            {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Solution'
-            }
-          ]
+          statuses: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Status'
+          }],
+          solutions: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Solution'
+          }]
         }
       ]
     }
-  ]
+  ],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+    required: true
+  }
 }, { timestamps: true });
 module.exports = mongoose.model('Car', carSchema);
