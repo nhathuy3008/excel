@@ -36,6 +36,9 @@ app.use('/api/cars', carRoutes);
 app.use('/api/statuses', statusRoutes);
 app.use('/api/solutions', solutionRoutes);
 app.use('/api/accounts', accountRoutes);
+app.get("/", (req, res) => {
+    res.status(200).send("🚀 Bá Thành backend is running.");
+});
 // MongoDB connection
 // mongoose.connect('mongodb://localhost:27017/excel', {
 //   useNewUrlParser: true,
